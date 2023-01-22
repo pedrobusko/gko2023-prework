@@ -1,0 +1,5 @@
+export CONFLUENT_CLOUD_API_KEY="<replace>"
+export CONFLUENT_CLOUD_API_SECRET="<replace>"
+export AWS_ACCESS_KEY_ID="<replace>"
+export AWS_SECRET_ACCESS_KEY="<replace>"
+export AWS_DEFAULT_REGION="eu-central-12"
