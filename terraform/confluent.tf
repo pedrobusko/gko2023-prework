@@ -270,7 +270,40 @@ resource "confluent_ksql_cluster" "ksql_cluster" {
 # ------------------------------------------------------
 # CONNECT
 # ------------------------------------------------------
-resource "confluent_connector" "rabbitmq_products" {
+#resource "confluent_connector" "rabbitmq_products" {
+#    environment {
+#        id = confluent_environment.env.id 
+#    }
+#    kafka_cluster {
+#        id = confluent_kafka_cluster.basic.id
+#    }
+#    status = "RUNNING"
+#    config_sensitive = {
+#        "rabbitmq.username": "ExampleUser",
+#        "rabbitmq.password": "MindTheGapLongPassword",
+#    }
+#    config_nonsensitive = {
+#        "connector.class": "RabbitMQSource",
+#        "name": "RabbitMQSourceConnector_0",
+#        "kafka.auth.mode": "KAFKA_API_KEY",
+#        "kafka.api.key": "${confluent_api_key.app_manager_keys.id}",
+#        "kafka.api.secret": "${confluent_api_key.app_manager_keys.secret}",
+#        "kafka.topic.bootstrap.servers": "${confluent_kafka_cluster.basic.bootstrap_endpoint}",
+#        "kafka.topic": "products_old",
+        #"rabbitmq.host": "${aws_mq_broker.rabbitmq.instances.0.ip_address}",
+        #"rabbitmq.host": "${aws_mq_broker.rabbitmq.instances.0.endpoints.0}",
+#        "rabbitmq.host": "b-515097c8-4b03-4dde-8c7c-2c865c7d25db.mq.eu-central-1.amazonaws.com",
+#        "rabbitmq.port": "5671",
+#        "rabbitmq.queue": "products_queue",
+#        "tasks.max": "1"
+#    }
+#    depends_on = [
+#        confluent_kafka_acl.connectors_source_acl_create_topic,
+#        confluent_kafka_acl.connectors_source_acl_write,
+#        confluent_api_key.connector_keys,
+#    ]
+#}
+resource "confluent_connector" "activemq_products" {
     environment {
         id = confluent_environment.env.id 
     }
@@ -279,31 +312,24 @@ resource "confluent_connector" "rabbitmq_products" {
     }
     status = "RUNNING"
     config_sensitive = {
-        "rabbitmq.username": "ExampleUser",
-        "rabbitmq.password": "MindTheGapLongPassword",
+        "activemq.username": "ExampleUser",
+        "activemq.password": "MindTheGapLongPassword",
     }
     config_nonsensitive = {
-        "connector.class" = "RabbitMQSourceConnector"
-        "name": "RabbitMQSourceConnector"
-        "kafka.topic" : "from-rabbit",
-        "rabbitmq.queue" : "products_old",
-        "rabbitmq.host": "rabbitmq",
-        "rabbitmq.port": "5672",
-        "rabbitmq.virtual.host": "/",
-        "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-        "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter",
-        "key.converter.schema.registry.url": "${confluent_schema_registry_cluster.sr.rest_endpoint}",
-        "key.converter.basic.auth.credentials.source":"USER_INFO",
-        "key.converter.schema.registry.basic.auth.user.info": "${confluent_api_key.schema-registry-api-key.id}",
-        "value.converter.schema.registry.url": "${confluent_schema_registry_cluster.sr.rest_endpoint}",
-        "value.converter.basic.auth.credentials.source":"USER_INFO",
-        "value.converter.schema.registry.basic.auth.user.info": "${confluent_api_key.schema-registry-api-key.secret}",
-        "confluent.license": "",
-        "confluent.topic.bootstrap.servers": "${confluent_kafka_cluster.basic.bootstrap_endpoint}",
-        #"confluent.topic.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"'${var.confluent_cloud_api_key}'\" password=\"'${var.confluent_cloud_api_secret}'\";",
-        "confluent.topic.security.protocol":"SASL_SSL",
-        "confluent.topic.sasl.mechanism":"PLAIN",
-        "confluent.topic.replication.factor": "1"
+        "connector.class": "ActiveMQSource",
+        "name": "ActiveMQSourceConnector_0",
+        "kafka.auth.mode": "KAFKA_API_KEY",
+        "kafka.api.key": "${confluent_api_key.app_manager_keys.id}",
+        "kafka.api.secret": "${confluent_api_key.app_manager_keys.secret}",
+        "kafka.topic": "products_old",
+        "output.data.format": "AVRO",
+        "activemq.url": "${aws_mq_broker.activemq.instances.0.endpoints.0}",
+        "jms.destination.name": "products_queue",
+        "jms.destination.type": "queue",
+        "max.poll.duration": "60000",
+        "character.encoding": "UTF-8",
+        "jms.subscription.durable": "false",
+        "tasks.max": "1"
     }
     depends_on = [
         confluent_kafka_acl.connectors_source_acl_create_topic,
