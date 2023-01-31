@@ -1,4 +1,4 @@
-# gko2023-prework
+# gko2023-Group 11
 GKO 2023 Pre-work - Creating a Confluent Cloud environment for Use Case 1
 
 
