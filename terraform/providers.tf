@@ -8,5 +8,8 @@ terraform {
             source = "confluentinc/confluent"
             version = "1.25.0"
         }
+        mongodbatlas = {
+            source = "mongodb/mongodbatlas"
+        }
     }
 }

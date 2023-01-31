@@ -70,6 +70,21 @@ resource "confluent_kafka_topic" "products" {
     prevent_destroy = false
   }
 }
+resource "confluent_kafka_topic" "joined_products" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.basic.id
+  }
+  topic_name         = "joined_products"
+  rest_endpoint      = confluent_kafka_cluster.basic.rest_endpoint
+  credentials {
+        key = confluent_api_key.app_manager_keys.id
+        secret = confluent_api_key.app_manager_keys.secret
+  }
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
 # ------------------------------------------------------
 # SERVICE ACCOUNTS
 # ------------------------------------------------------
@@ -331,6 +346,60 @@ resource "confluent_connector" "activemq_products" {
         "jms.subscription.durable": "false",
         "tasks.max": "1"
     }
+    depends_on = [
+        confluent_kafka_acl.connectors_source_acl_create_topic,
+        confluent_kafka_acl.connectors_source_acl_write,
+        confluent_api_key.connector_keys,
+    ]
+}
+
+resource "confluent_connector" "mongodb_products" {
+    environment {
+        id = confluent_environment.env.id 
+    }
+    kafka_cluster {
+        id = confluent_kafka_cluster.basic.id
+    }
+    status = "RUNNING"
+    config_sensitive = {
+        "connection.user": "mongodb_username",
+        "connection.password": "****************************",
+    }
+    config_nonsensitive = {
+        "connector.class": "MongoDbAtlasSink",
+        "name": "MongoDbAtlasSinkConnector_0",
+        "input.data.format": "AVRO",
+        "cdc.handler": "None",
+        "delete.on.null.values": "false",
+        "max.batch.size": "0",
+        "bulk.write.ordered": "true",
+        "rate.limiting.timeout": "0",
+        "rate.limiting.every.n": "0",
+        "write.strategy": "DefaultWriteModelStrategy",
+        "kafka.auth.mode": "KAFKA_API_KEY",
+        "kafka.api.key": "${confluent_api_key.app_manager_keys.id}",
+        "kafka.api.secret": "${confluent_api_key.app_manager_keys.secret}",
+        "topics": "joined_products",
+        "connection.host": "${mongodbatlas_cluster.cluster-test.mongo_uri}",
+        "database": "cluster-test-global",
+        "doc.id.strategy": "BsonOidStrategy",
+        "doc.id.strategy.overwrite.existing": "false",
+        "document.id.strategy.uuid.format": "string",
+        "key.projection.type": "none",
+        "value.projection.type": "none",
+        "namespace.mapper.class": "DefaultNamespaceMapper",
+        "namespace.mapper.error.if.invalid": "false",
+        "server.api.deprecation.errors": "false",
+        "server.api.strict": "false",
+        "max.num.retries": "3",
+        "retries.defer.timeout": "5000",
+        "timeseries.timefield.auto.convert": "false",
+        "timeseries.timefield.auto.convert.date.format": "yyyy-MM-dd[['T'][ ]][HH:mm:ss[[.][SSSSSS][SSS]][ ]VV[ ]'['VV']'][HH:mm:ss[[.][SSSSSS][SSS]][ ]X][HH:mm:ss[[.][SSSSSS][SSS]]]",
+        "timeseries.timefield.auto.convert.locale.language.tag": "en",
+        "timeseries.expire.after.seconds": "0",
+        "ts.granularity": "None",
+        "tasks.max": "1"
+  }
     depends_on = [
         confluent_kafka_acl.connectors_source_acl_create_topic,
         confluent_kafka_acl.connectors_source_acl_write,
