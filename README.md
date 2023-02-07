@@ -24,10 +24,13 @@ Next, you should create a secrets file to store you keys and secrets.
 ```bash
 cat <<EOF > env.sh
 export CONFLUENT_CLOUD_API_KEY="<replace>"
-export CONFLUENT_CLOUD_API_SECRET="<replace>" 
+export CONFLUENT_CLOUD_API_SECRET="<replace>"
+export MONGODB_ATLAS_PUBLIC_KEY="<replace>"
+export MONGODB_ATLAS_PRIVATE_KEY="<replace>"
 export AWS_ACCESS_KEY_ID="<replace>"
 export AWS_SECRET_ACCESS_KEY="<replace>"
 export AWS_DEFAULT_REGION="us-east-2"
+
 EOF
 ```
 
