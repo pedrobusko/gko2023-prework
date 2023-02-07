@@ -30,6 +30,10 @@ export MONGODB_ATLAS_PRIVATE_KEY="<replace>"
 export AWS_ACCESS_KEY_ID="<replace>"
 export AWS_SECRET_ACCESS_KEY="<replace>"
 export AWS_DEFAULT_REGION="us-east-2"
+export TF_VAR_mongodb_username="<replace>"
+export TF_VAR_mongodb_password="<replace>"
+export TF_VAR_activemq_username="<replace>"
+export TF_VAR_activemq_password="<replace>"
 
 EOF
 ```
